@@ -14,7 +14,7 @@ jobs:
         run: |
           if [ ! -d VietnameseTelexKeyboard ]; then
             zipfile=$(ls *.zip | head -n1)
-            unzip -o -q "$zipfile" -d VietnameseTelexKeyboard
+            unzip -o -q "$zipfile" -d .
           fi
 
       - name: Set up JDK 17
