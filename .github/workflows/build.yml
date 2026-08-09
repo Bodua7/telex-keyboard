@@ -29,13 +29,23 @@ jobs:
         with:
           gradle-version: '8.9'
 
+      - name: Extract project zip if needed
+        run: |
+          ZIP_FILE=$(find "$GITHUB_WORKSPACE" -maxdepth 2 -iname "*.zip" | head -n 1)
+          if [ -n "$ZIP_FILE" ]; then
+            echo "Found zip: $ZIP_FILE — extracting..."
+            unzip -o -q "$ZIP_FILE" -d "$GITHUB_WORKSPACE"
+          else
+            echo "No zip file found, assuming source is already unpacked."
+          fi
+
       - name: Locate project directory
         id: locate
         run: |
-          SETTINGS_FILE=$(find "$GITHUB_WORKSPACE" -maxdepth 3 -name "settings.gradle" | head -n 1)
+          SETTINGS_FILE=$(find "$GITHUB_WORKSPACE" -maxdepth 4 -name "settings.gradle" -not -path "*/.git/*" | head -n 1)
           if [ -z "$SETTINGS_FILE" ]; then
             echo "Could not find settings.gradle anywhere under the repo!" >&2
-            find "$GITHUB_WORKSPACE" -maxdepth 3 >&2
+            find "$GITHUB_WORKSPACE" -maxdepth 4 -not -path "*/.git/*" >&2
             exit 1
           fi
           PROJECT_DIR=$(dirname "$SETTINGS_FILE")
