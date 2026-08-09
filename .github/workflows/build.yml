@@ -17,14 +17,17 @@ jobs:
             unzip -o -q "$zipfile" -d .
           fi
 
-      - name: Ensure compileSdk/targetSdk pinned to 33
+      - name: Ensure build.gradle is pinned correctly
         run: |
           GRADLE_FILE="VietnameseTelexKeyboard/app/build.gradle"
           sed -i 's/compileSdk 34/compileSdk 33/' "$GRADLE_FILE"
           sed -i 's/targetSdk 34/targetSdk 33/' "$GRADLE_FILE"
           sed -i '/buildToolsVersion "34.0.0"/d' "$GRADLE_FILE"
+          sed -i "s/androidx.core:core-ktx:1.12.0/androidx.core:core-ktx:1.10.1/" "$GRADLE_FILE"
           echo "----- android block -----"
-          sed -n '1,10p' "$GRADLE_FILE"
+          sed -n '1,15p' "$GRADLE_FILE"
+          echo "----- dependencies -----"
+          grep -A5 "^dependencies" "$GRADLE_FILE"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -40,9 +43,17 @@ jobs:
         with:
           gradle-version: 8.5
 
+      - name: Generate Gradle Wrapper (if missing)
+        working-directory: VietnameseTelexKeyboard
+        run: |
+          if [ ! -f gradlew ]; then
+            gradle wrapper --gradle-version 8.5 --distribution-type all
+          fi
+          chmod +x gradlew
+
       - name: Build debug APK
         working-directory: VietnameseTelexKeyboard
-        run: gradle assembleDebug
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
