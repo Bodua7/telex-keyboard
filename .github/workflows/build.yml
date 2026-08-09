@@ -17,12 +17,12 @@ jobs:
             unzip -o -q "$zipfile" -d .
           fi
 
-      - name: Ensure buildToolsVersion is pinned
+      - name: Ensure compileSdk/targetSdk pinned to 33
         run: |
           GRADLE_FILE="VietnameseTelexKeyboard/app/build.gradle"
-          if ! grep -q "buildToolsVersion" "$GRADLE_FILE"; then
-            sed -i '/compileSdk 34/a\    buildToolsVersion "34.0.0"' "$GRADLE_FILE"
-          fi
+          sed -i 's/compileSdk 34/compileSdk 33/' "$GRADLE_FILE"
+          sed -i 's/targetSdk 34/targetSdk 33/' "$GRADLE_FILE"
+          sed -i '/buildToolsVersion "34.0.0"/d' "$GRADLE_FILE"
           echo "----- android block -----"
           sed -n '1,10p' "$GRADLE_FILE"
 
@@ -34,9 +34,6 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Install matching SDK platform & build-tools
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
